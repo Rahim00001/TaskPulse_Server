@@ -1,41 +1,21 @@
 const express = require('express');
-const cors = require('cors');
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const cors = require("cors");
+require('dotenv').config()
+const cookieParser = require("cookie-parser");
 const app = express();
-require('dotenv').config();
 const port = process.env.PORT || 5000;
+const connectDB = require('./src/db/connectDB');
 
 // middleware
-app.use(cors());
+app.use(
+    cors({
+        origin: [process.env.LOCAL_CLIENT],
+        credentials: true,
+    })
+);
+console.log("apply middleware", process.env.LOCAL_CLIENT);
 app.use(express.json());
-
-
-
-const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.lk92epi.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
-
-// Create a MongoClient with a MongoClientOptions object to set the Stable API version
-const client = new MongoClient(uri, {
-    serverApi: {
-        version: ServerApiVersion.v1,
-        strict: true,
-        deprecationErrors: true,
-    }
-});
-
-async function run() {
-    try {
-        // Connect the client to the server	(optional starting in v4.7)
-        await client.connect();
-        // Send a ping to confirm a successful connection
-        await client.db("admin").command({ ping: 1 });
-        console.log("Pinged your deployment. You successfully connected to MongoDB!");
-    } finally {
-        // Ensures that the client will close when you finish/error
-        // await client.close();
-    }
-}
-run().catch(console.dir);
-
+app.use(cookieParser());
 
 
 
@@ -43,6 +23,23 @@ app.get('/', (req, res) => {
     res.send('TaskPulse is working')
 })
 
-app.listen(port, () => {
-    console.log(`TaskPulse server is working on ${port}`)
+app.all("*", (req, res, next) => {
+    const error = new Error(`the requested error is invalid:  [${req.url}]`)
+    error.status = 404
+    next(error)
 })
+
+app.use((err, req, res, next) => {
+    res.status(err.status || 5000).json({
+        message: err.message
+    })
+})
+
+const main = async () => {
+    await connectDB()
+    app.listen(port, () => {
+        console.log('TaskPulse server is running on', port);
+    })
+}
+
+main()
