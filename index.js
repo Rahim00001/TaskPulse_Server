@@ -5,6 +5,7 @@ const cookieParser = require("cookie-parser");
 const app = express();
 const port = process.env.PORT || 5000;
 const connectDB = require('./src/db/connectDB');
+const UserRouter = require("./src/routes/user")
 
 // middleware
 app.use(
@@ -18,6 +19,7 @@ app.use(express.json());
 app.use(cookieParser());
 
 
+app.use('/auth', UserRouter)
 
 app.get('/', (req, res) => {
     res.send('TaskPulse is working')
