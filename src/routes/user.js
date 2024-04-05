@@ -106,7 +106,12 @@ const verifyUser = async (req, res, next) => {
 
 router.get('/verify', verifyUser, (req, res) => {
     return res.json({ status: true, message: "Authorized User" })
-})
+});
+
+router.get('/logout', (req, res) => {
+    res.clearCookie('token')
+    return res.json({ status: true })
+});
 
 
 module.exports = router
