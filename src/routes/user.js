@@ -89,4 +89,24 @@ router.post('/reset-password/:token', async (req, res) => {
     }
 })
 
+
+// verify user middleware
+const verifyUser = async (req, res, next) => {
+    try {
+        const token = req.cookies.token;
+        if (!token) {
+            return res.json({ status: false, message: 'No token' });
+        }
+        const decoded = await jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
+        next()
+    } catch (err) {
+        return res.json(err);
+    }
+}
+
+router.get('/verify', verifyUser, (req, res) => {
+    return res.json({ status: true, message: "Authorized User" })
+})
+
+
 module.exports = router

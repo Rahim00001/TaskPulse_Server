@@ -25,6 +25,7 @@ app.get('/', (req, res) => {
     res.send('TaskPulse is working')
 })
 
+// basic error handling
 app.all("*", (req, res, next) => {
     const error = new Error(`the requested error is invalid:  [${req.url}]`)
     error.status = 404
